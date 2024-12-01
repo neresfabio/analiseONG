@@ -1,4 +1,4 @@
-# Site ONG
+# Guia de Desenvolvimento e Estruturação do Site Institucional da ONG Gabriel
 
 **Objetivo Geral**
 
@@ -236,4 +236,31 @@ def user_dashboard(request):
 @login_required
 def admin_dashboard(request):
     return render(request, 'contas/admin_dashboard.html')
+```
+### Exmplo 2:  Incluir logs para monitoramento, ajudando na depuração de problemas em produção:
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+def user_login(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                logger.info(f"Usuário {username} logado com sucesso.")
+                if user.role == 'admin':
+                    return redirect('admin_dashboard')
+                else:
+                    return redirect('user_dashboard')
+            else:
+                logger.warning(f"Tentativa de login falha para {username}.")
+    else:
+        form = CustomAuthenticationForm()
+    return render(request, 'contas/login.html', {'form': form})
 ```
